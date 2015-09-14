@@ -133,7 +133,7 @@ docs_bulk.data.frame <- function(x, index = NULL, type = NULL, chunk_size = 1000
   data_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
   
   # get id_chks
-  if (is.vector(docs_ids)) {
+  if (is.vector(doc_ids)) {
     id_chks <- split(doc_ids, ceiling(seq_along(doc_ids) / chunk_size))
   } else if (is.null(doc_ids) || doc_ids == TRUE) {
     if (has_ids(x)) {
@@ -171,7 +171,7 @@ docs_bulk.list <- function(x, index = NULL, type = NULL, chunk_size = 1000,
   data_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
   
   # get id_chks
-  if (is.vector(docs_ids)) {
+  if (is.vector(doc_ids)) {
     id_chks <- split(doc_ids, ceiling(seq_along(doc_ids) / chunk_size))
   } else if (is.null(doc_ids) || doc_ids == TRUE) {
     if(has_ids(x)) {
