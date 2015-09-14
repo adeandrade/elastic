@@ -162,15 +162,22 @@ docs_bulk.list <- function(x, index = NULL, type = NULL, chunk_size = 1000,
   x <- check_named_vectors(x)
   rws <- seq_len(length(x))
   data_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
-  if (!is.null(doc_ids)) {
+  
+  # get id_chks
+  if (is.vector(docs_ids)) {
     id_chks <- split(doc_ids, ceiling(seq_along(doc_ids) / chunk_size))
-  } else if (has_ids(x)) {
-    rws <- as.numeric(sapply(x, "[[", "id"))
-    id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size)) 
+  } else if (is.null(doc_ids) || doc_ids == TRUE) {
+    if(has_ids(x)) {
+      rws <- as.numeric(sapply(x, "[[", "id"))
+      id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size)) 
+    } else {
+      rws <- shift_start(rws, index, type)
+      id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
+    }
   } else {
-    rws <- shift_start(rws, index, type)
-    id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
+    id_chks <- NULL
   }
+  
   pb <- txtProgressBar(min = 0, max = length(data_chks), initial = 0, style = 3)
   on.exit(close(pb))
   for (i in seq_along(data_chks)) {
@@ -198,9 +205,15 @@ docs_bulk.character <- function(x, index = NULL, type = NULL, chunk_size = 1000,
   if (raw) res else es_parse(res)
 }
 
-make_bulk <- function(df, index, type, counter) {
-  metadata_fmt <- '{"index":{"_index":"%s","_type":"%s","_id":%s}}'
-  metadata <- sprintf(metadata_fmt, index, type, counter)
+make_bulk <- function(df, index, type, ids=NULL) {
+  if(is.null(ids)){
+    metadata_fmt <- '{"index":{"_index":"%s","_type":"%s"}}'
+    metadata <- sprintf(metadata_fmt, index, type)
+  } else {
+    metadata_fmt <- '{"index":{"_index":"%s","_type":"%s","_id":%s}}'
+    metadata <- sprintf(metadata_fmt, index, type, ids)
+  }
+  
   data <- jsonlite::toJSON(df, collapse = FALSE)
   tmpf <- tempfile("elastic__")
   writeLines(paste(metadata, data, sep = "\n"), tmpf)
