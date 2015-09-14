@@ -131,15 +131,22 @@ docs_bulk.data.frame <- function(x, index = NULL, type = NULL, chunk_size = 1000
   row.names(x) <- NULL
   rws <- seq_len(NROW(x))
   data_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
-  if (!is.null(doc_ids)) {
+
+  # get id_chks
+  if (is.vector(docs_ids)) {
     id_chks <- split(doc_ids, ceiling(seq_along(doc_ids) / chunk_size))
-  } else if (has_ids(x)) {
-    rws <- x$id
-    id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
+  } else if (is.null(doc_ids) || doc_ids == TRUE) {
+    if(has_ids(x)) {
+      rws <- as.numeric(sapply(x, "[[", "id"))
+      id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size)) 
+    } else {
+      rws <- shift_start(rws, index, type)
+      id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
+    }
   } else {
-    rws <- shift_start(rws, index, type)
-    id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size))
+    id_chks <- NULL
   }
+  
   pb <- txtProgressBar(min = 0, max = length(data_chks), initial = 0, style = 3)
   on.exit(close(pb))
   for (i in seq_along(data_chks)) {
