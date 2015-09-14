@@ -175,7 +175,7 @@ docs_bulk.list <- function(x, index = NULL, type = NULL, chunk_size = 1000,
     id_chks <- split(doc_ids, ceiling(seq_along(doc_ids) / chunk_size))
   } else if (is.null(doc_ids) || doc_ids == TRUE) {
     if(has_ids(x)) {
-      rws <- as.numeric(sapply(x, "[[", "id"))
+      rws <- sapply(x, "[[", "id")
       id_chks <- split(rws, ceiling(seq_along(rws) / chunk_size)) 
     } else {
       rws <- shift_start(rws, index, type)
