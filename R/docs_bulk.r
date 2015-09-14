@@ -230,10 +230,8 @@ shift_start <- function(vals, index, type = NULL) {
 }
 
 check_doc_ids <- function(x, ids) {
-  if (!is.null(ids)) {
-    if (!all(1:NROW(x) == 1:length(ids))) {
-      stop("ids length must equal number of documents", call. = FALSE)
-    }
+  if (is.vector(ids) && nrow(x) != length(ids)) {
+    stop("ids length must equal number of documents", call. = FALSE)
   }
 }
 
